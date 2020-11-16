@@ -4,7 +4,7 @@ from tkinter import ttk
 import string
 import random
 
-app = App(layout="grid",title="Skrabble",height=680)
+app = App(layout="grid",title="Skrabble",width=583,height=705)
 
 alphabet = list(string.ascii_uppercase)
 
@@ -30,21 +30,24 @@ def Multipliers():
 def SetBoard():
     global i
     global squares
-    boardframe = Box(app,layout="grid",grid=[0,0,1,17])
+    boardframe = Box(app,layout="grid",grid=[4,0,1,17])
     boardframe.bg="turquoise4"
     squares = list()
     y = 0
     x = 0
-
     for i in range(289):
         if i % 17 == 0 and i!=0:
             y += 1
             x -= 17        
         if x in [0,16]:
             row = i//17
-            squares.append(Text(boardframe,grid=[x,y],text=alphabet[row-1],color="white",width=2,height=1))
+            squares.append(Text(boardframe,grid=[x,y],
+                                text=alphabet[row-1],color="white",
+                                width=2,height=1))
         elif y in [0,16]:
-            squares.append(Text(boardframe,grid=[x,y],text=x,color="white",width=3))
+            squares.append(Text(boardframe,grid=[x,y],
+                                text=x,color="white",
+                                width=3))
         else:
             squares.append(PushButton(boardframe,grid=[x,y],text="",width=3,height=1))            
             squares[-1].tk.configure(borderwidth=1)
@@ -55,16 +58,56 @@ def SetBoard():
 
 
 
-SetBoard()
-    
+#SetBoard()
 
+def AddInfo():
+    text = "Player "+str(z+1)+"\n\nScore: "+str(scores[z])
+    playerinfo.append(PushButton(app,text=str(text),grid=[z,0],width=8))
+    playerinfo[-1].text_size=15
+    playerinfo[-1].bg="white"
+    if no_of_players==2:
+        playerinfo[-1].grid=[2*z,0,2,1]
+        playerinfo[-1].width=17
+    if no_of_players==3:
+        playerinfo[-1].width=10
+        if z == 1:
+            playerinfo[-1].grid=[z,0,2,1]
+        if z == 2:
+            playerinfo[-1].grid=[3,0]
+
+playerinfo = list()
+scores = []
+
+##def ShowHand():
+##    tiles = list()
+##    for i in range(7):
+##        tiles.appe
+        
+    
+def Play():
+    global z
+    global no_of_players
+    message1.visible=False
+    combo.visible=False
+    playbutton.visible=False
+    no_of_players = int(combo.value)
+    for z in range(no_of_players):
+        scores.append(0)
+        AddInfo()                
+    AddTiles()
+            
+        
 
 def AddDialogue():
-    message1 = Text(app, grid=[1,4],text="How many players?",size=35,width = 23)
-    combo = Combo(app,options=[2,3,4],width=10,grid=[1,8])
+    global message1
+    global combo
+    global playbutton
+    ctrlframe = Box(app,layout="grid",grid=[0,0,4,17],width=583,height=705)
+    message1 = Text(app, grid=[0,4,4,1],text="How many players?",size=30,width = 25)
+    combo = Combo(app,options=[2,3,4],width=10,grid=[0,8,4,1])
     combo.text_size=20
     combo.bg="white"
-    playbutton = PushButton(app,text="PLAY",grid=[1,12],width=7)
+    playbutton = PushButton(app,text="PLAY",grid=[0,12,4,1],width=7,command=Play)
     playbutton.text_size=50
     playbutton.bg="green2"
 
@@ -75,30 +118,22 @@ AddDialogue()
 
 def AddTiles():
     alphabet.append("Blank")
-
     points = [1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 10, 1, 1, 1, 1, 4, 4, 8, 4, 10, 0]
     letterfreq = [9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1, 2]
-    tiles = []
-
+    alltiles = []
     for number in range(27):
         for freq in range(letterfreq[number]):
-            tiles.append(alphabet[number])
-
-    random.shuffle(tiles)
-
-    print(tiles)
-
-    Playerfreq = 2
-
+            alltiles.append(alphabet[number])
+    random.shuffle(alltiles)
+    #print(alltiles)
     hands = list()
-    for x in range(Playerfreq):
+    for x in range(no_of_players):
         hands.append([])
         for i in range(7):
-            hands[x].append(tiles[-1])
-            tiles.pop()
-
-        print(hands[x])
-    print(tiles)
+            hands[x].append(alltiles[-1])
+            alltiles.pop()
+        #print(hands[x])
+    #print(alltiles)
 
     
 #AddTiles()
