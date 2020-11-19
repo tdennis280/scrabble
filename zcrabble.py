@@ -31,16 +31,15 @@ tileindex = ""
 
 def SelectSquare(a):
     global tileindex,TilesUsed
-    if tileindex != "":
-        squares[a].tk.configure(bg="light goldenrod",font="Helvetica 9 bold")
-        squares[a].text=hands[turn-1][tileindex]
-        hand[tileindex].bg="SystemButtonFace"
-        hand[tileindex].text=""
-        hand[tileindex].enabled=False
-        print(hands[turn-1])
-        TilesUsed.append(tileindex)
-        print(hands[turn-1])
-    tileindex = ""
+    if squares[a].bg != "light goldenrod":
+        if tileindex != "":
+            squares[a].tk.configure(bg="light goldenrod",font="Helvetica 9 bold")
+            squares[a].text=hand[tileindex].text
+            hand[tileindex].bg="SystemButtonFace"
+            hand[tileindex].text=""
+            hand[tileindex].enabled=False
+            TilesUsed.append(tileindex)
+        tileindex = ""
 
 def SetBoard():
     global a,squares
@@ -94,15 +93,37 @@ playerinfo = list()
 scores = []
 
 turn=0
+movecount=0
 
 TilesUsed = []
 
 def NextTurn():
-    global turn,TilesUsed
-##    for each in TilesUsed:
-##        hands[turn-1].pop(each)
-##    TilesUsed = []
-##    print(hands)
+    global turn,TilesUsed,movecount
+
+##    print("before",hands[turn])
+##    print(TilesUsed)
+    TilesUsed.sort(reverse=True)
+    for each in TilesUsed:
+        hands[turn].pop(each)
+##        print(hands[turn])
+##    print("after",hands[turn])
+
+    
+    
+    if movecount != 0:
+        turn+=1
+        if turn == no_of_players:
+            turn -= no_of_players
+    movecount+=1
+
+    SwitchHand()
+    
+    
+
+    TilesUsed = []
+
+def SwitchHand():
+    global keeptiles
     for i in playerinfo:
         i.enabled=False
         i.bg="white"
@@ -119,23 +140,17 @@ def NextTurn():
         else:
             hand[i].text=hands[turn][i]
             hand[i].bg="light goldenrod"
+            hand[i].enabled=True
         hand[i].text_color="black"
     if keeptiles < 7:
         DrawButton.enabled=True
         NextButton.enabled=False
-    turn+=1
-    if turn == no_of_players:
-        turn -= no_of_players
 
-    
-    for each in TilesUsed:
-        hands[turn].pop(each)
-    TilesUsed = []    
-
+        
 def SelectTile(i):
     global tileindex, HandFull
     #print ("This is Button: " + str(i))
-    if len(hands[turn-1])==7:      
+    if len(hands[turn])==7:      
         for j in hand:
             if j.enabled==True:
                 j.bg="light goldenrod"
@@ -143,7 +158,6 @@ def SelectTile(i):
         hand[i].bg="brown"
         hand[i].text_color="white"
         tileindex = i
-        print(hands[turn-1][i])
 
 def ShowHand():
     global hand
@@ -154,7 +168,6 @@ def ShowHand():
         hand[-1].tk.configure(borderwidth=5) 
         if i > 3:
             hand[-1].grid = [i-4,9,2,1]
-    print(hand)
 
 def AddTiles():
     global alltiles,hands
@@ -190,8 +203,7 @@ def TakeTile():
         hand[Visible].text=""
     else:
         hand[Visible].text=alltiles[-1]
-    hands[turn-1].append(alltiles[-1])
-    print(hands)
+    hands[turn].append(alltiles[-1])
     alltiles.pop()
     DrawButton.text="Click to take a tile from the bag!\nTiles remaining: "+str(len(alltiles))
            
