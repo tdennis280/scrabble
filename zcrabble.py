@@ -15,7 +15,7 @@ def Play():
     playbutton.visible=False
     no_of_players = int(combo.value)
     AddInfo()
-    AddTiles()
+    AddBag()
     text = "Click to take a tile from the bag!\nTiles remaining: "+str(len(alltiles))
     DrawButton = PushButton(app,grid=[0,6,4,1],text=text,command=TakeTile)
     DrawButton.text_size=15
@@ -39,21 +39,28 @@ def AddDialogue():
 
 AddDialogue()
 
-
+x3word = [18,25,32,137,151,256,263,270]
+x2word = [36,48,54,64,72,80,90,96,144,192,198,208,216,224,234,240,252]
+x3letter = [40,44,104,108,112,116,172,176,180,184,244,248]
+x2letter = [21,29,58,60,69,76,83,122,126,128,132,140,148,156,
+           160,162,166,205,212,219,228,230,259,267]
 
 def BoardDesign(a,last):
 
-    if a in [18,25,32,137,151,256,263,270]:
+
+    if a in x3word:
         squares[last].tk.configure(bg="red",font="Helvetica 9 bold")
         squares[last].text="TRIPLE\nWORD\nSCORE"
-    elif a in [36,48,54,64,72,80,90,96,144,192,198,208,216,224,234,240,252]:
+    
+    elif a in x2word:
         squares[last].tk.configure(bg="LightPink2",font="Helvetica 9 bold")
         squares[last].text="DOUBLE\nWORD\nSCORE"
-    elif a in [40,44,104,108,112,116,172,176,180,184,244,248]:
+    
+    elif a in x3letter:
         squares[last].tk.configure(bg="dodger blue",font="Helvetica 9 bold")
         squares[last].text="TRIPLE\nLETTER\nSCORE"
-    elif a in [21,29,58,60,69,76,83,122,126,128,132,140,148,156,
-               160,162,166,205,212,219,228,230,259,267]:
+
+    elif a in x2letter:
         squares[last].tk.configure(bg="light blue",font="Helvetica 9 bold")
         squares[last].text="DOUBLE\nLETTER\nSCORE"
     else:
@@ -111,7 +118,7 @@ def SetBoard():
         else:
             squares.append(PushButton(boardframe,grid=[x,y],width=3,height=1,
                                       command=lambda a=a: SelectSquare(a)))            
-            squares[-1].tk.configure(borderwidth=1)
+            squares[-1].tk.configure(borderwidth=2)
             last=-1
             BoardDesign(a,last)
         if squares[-1].value in ["Z","P"]:
@@ -147,9 +154,57 @@ movecount=0
 TilesUsed = []
 SquaresUsed = []
 
+alignment = "null"
+
+def AddScore():
+    global alignment
+    if SquaresUsed != []:
+        #print(SquaresUsed[0])
+        #print(squares[SquaresUsed[0]].bg)
+        #print(SquaresUsed[0] + 17)
+        #print(squares[SquaresUsed[0] + 1].bg)
+        squareleft = squares[SquaresUsed[0] - 1].bg
+        squareright = squares[SquaresUsed[0] + 1].bg
+        #print(squareleft,squareright)
+        if squareleft == "goldenrod1" or squareright == "goldenrod1":
+            alignment = "horizontal"
+        else:
+            alignment = "vertical"
+        print(alignment)
+            
+    scoremultiply = 1
+    score = 0
+    for i in SquaresUsed:
+        print(i)
+        letter = squares[i].text
+        #print(letter)
+        letterindex = alphabet.index(letter)
+        value = points[letterindex]
+        #print(value)
+        if i in x2letter:
+            value *= 2
+        elif i in x3letter:
+            value *= 3
+        #print(value)
+        score += value
+    #print(score)
+    #print(scores)
+    scores[turn] += score
+    #print(scores)
+    text = "Player "+str(turn+1)+"\n\nScore: "+str(scores[turn])
+    playerinfo[turn].text=str(text)
+    
+    
+        
+        
+
 def NextTurn():
     global turn,TilesUsed,SquaresUsed,movecount
-    print(TilesUsed)
+    #print(TilesUsed)
+    print(SquaresUsed)
+    
+    AddScore()
+        
     TilesUsed.sort(reverse=True)
     for each in TilesUsed:
         hands[turn].pop(each)
@@ -214,9 +269,9 @@ def ShowHand():
         if i > 3:
             hand[-1].grid = [i-4,12,2,1]
 
-def AddTiles():
-    global alltiles,hands
-    alphabet.append("Blank")
+def AddBag():
+    global alltiles,hands,points
+    alphabet.append("")
     points = [1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 10, 1,
               1, 1, 1, 4, 4, 8, 4, 10, 0]
     letterfreq = [9, 2, 2, 4, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1,
@@ -241,17 +296,11 @@ def TakeTile():
     if Visible == 6:
         DrawButton.enabled=False
         NextButton.enabled=True
-    if alltiles[-1]=="Blank":
-        hand[Visible].text=""
-    else:
-        hand[Visible].text=alltiles[-1]
+    hand[Visible].text=alltiles[-1]
     hands[turn].append(alltiles[-1])
     alltiles.pop()
     DrawButton.text="Click to take a tile from the bag!\nTiles remaining: "+str(len(alltiles))
            
-
-
-    
 
 def AddDialogue():
     global message1,combo,playbutton
